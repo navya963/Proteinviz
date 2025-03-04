@@ -1,20 +1,24 @@
-from Bio.PDB import PDBList, PDBParser
-import nglview as nv
+from biopandas.pdb import PandasPdb
+import py3Dmol
 
-# Function to download a PDB structure
-def fetch_pdb_structure(pdb_id):
-    pdbl = PDBList()
-    filename = pdbl.retrieve_pdb_file(pdb_id, file_format="pdb", pdir=".")
-    return filename
+def visualize_protein(pdb_id):
+    """Fetch and visualize a protein structure from the RCSB PDB database."""
+    url = f"https://files.rcsb.org/download/{pdb_id}.pdb"
+    
+    try:
+        ppdb = PandasPdb().fetch_pdb(pdb_id)
+        ppdb.to_pdb(f"{pdb_id}.pdb", gz=False)
+        
+        # Display in 3D
+        view = py3Dmol.view(width=800, height=600)
+        view.addModel(open(f"{pdb_id}.pdb", "r").read(), "pdb")
+        view.setStyle({"cartoon": {"color": "spectrum"}})
+        view.zoomTo()
+        return view.show()
+    
+    except Exception as e:
+        print(f"Error fetching {pdb_id}: {e}")
 
-# Fetch a sample protein (e.g., Hemoglobin: 1HHO)
-pdb_id = "1HHO"  # Change this to any PDB ID
-pdb_file = fetch_pdb_structure(pdb_id)
-
-# Parse the structure
-parser = PDBParser(QUIET=True)
-structure = parser.get_structure(pdb_id, pdb_file)
-
-# Visualize with nglview
-view = nv.show_biopython(structure)
-view
+# Ask user for PDB ID
+pdb_id = input("Enter a PDB ID (e.g., 1BNA, 1A8M): ").strip()
+visualize_protein(pdb_id)
