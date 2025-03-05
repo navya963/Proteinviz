@@ -25,7 +25,8 @@ def visualize_protein():
     
     # Option to save the image
     def save_image():
-        viewer.png("protein_structure.png")
+        with open("protein_structure.png", "wb") as f:
+    f.write(viewer.png())
         messagebox.showinfo("Saved", "Protein structure saved as protein_structure.png")
     
     save_button = tk.Button(root, text="Save Image", command=save_image)
